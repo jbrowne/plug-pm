@@ -25,6 +25,7 @@ THE SOFTWARE.
     var info = {
         version: 0.6,
         author: "citizenSnips",
+        whatsNew: ""
     };
 
     function Chat(srcId, srcName, dstId, dstName, msg) 
@@ -113,14 +114,14 @@ THE SOFTWARE.
         displayReceivedChat(chat);
     };
 
-    function sendChatToUserInRoom(username, message) 
+    function sendPMToUserInRoom(username, message) 
     {
         var success = false;
         var userList = API.getUsers();
         for (var idx in userList) {
             if (userList[idx].username == username) {
                 var id = userList[idx].id;
-                sendChat_(id, username, message);
+                sendPM_(id, username, message);
                 success = true;
                 break;
             }
@@ -139,7 +140,7 @@ THE SOFTWARE.
             var name = nameAndMessageTuple[0];
             var message = nameAndMessageTuple[1];
             console.log(name + ":" + message);
-            var result = sendChatToUserInRoom(name, message);
+            var result = sendPMToUserInRoom(name, message);
             if (!result) {
                 API.chatLog("PM failed...");
                 console.log("\"" + command + "\"" + " == " + name + ":" + message);
@@ -158,11 +159,13 @@ THE SOFTWARE.
         FirebaseData.ReceiveChannel.remove();
     };
 
-    function sendChat_(dstId, dstName, message) 
+    function sendPM_(dstId, dstName, message) 
     {
-        var chat = Chat(API.getUser().id, API.getUser().username, dstId, dstName, message);
-        displaySentChat(chat);
-        FirebaseData.SendChannel.child(chat.recipient.id).push(chat);
+        if (message.length > 0) {
+            var chat = Chat(API.getUser().id, API.getUser().username, dstId, dstName, message);
+            displaySentChat(chat);
+            FirebaseData.SendChannel.child(chat.recipient.id).push(chat);
+        }
     };
 
     function splitUsernameMessage_(input) 
@@ -194,7 +197,12 @@ THE SOFTWARE.
         API.on(API.CHAT_COMMAND, onChatCommand);
         API.chatLog("Loaded Plug.pm " + info.version);
         displayStatusChat("Type /pm @person <message>");
-        displayStatusChat("What's new: You can pm people with spaces in their names!");
+        if (info.whatsNew.length > 0) {
+            displayStatusChat(info.whatsNew);
+        }
+
+        //Register with plug's API object
+        API.sendPMToUserInRoom = sendPMToUserInRoom;
     };
 
     function preload() 
