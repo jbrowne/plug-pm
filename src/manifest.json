@@ -1,0 +1,17 @@
+{
+  "manifest_version": 2,
+
+  "name": "Plug-cubed PM",
+  "description": "Private Messaging for Plug.dj.",
+  "version": "0.5",
+  "icons": { "128": "icons/icon128.png" },
+  "web_accessible_resources": ["scripts/plug-pm.js"],
+
+  "content_scripts": [
+    {
+    	"matches": ["*://plug.dj/*"],
+    	"js": ["scripts/html-sanitizer.js", "content_script.js"],
+    	"run_at": "document_idle"
+    }
+  ]
+}
