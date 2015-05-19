@@ -23,10 +23,11 @@ THE SOFTWARE.
 
 (function() {
     var info = {
-        version: 0.6,
+        version: 0.7,
         author: "citizenSnips",
         whatsNew: ""
     };
+    var all_windows = [];
 
     function Chat(srcId, srcName, dstId, dstName, msg) 
     {
@@ -74,6 +75,13 @@ THE SOFTWARE.
           .append(
             jQuery("<span>", {class:"text", text: chat.message})
           );
+        if (all_windows) {
+            for (var idx in all_windows) {
+                var win = all_windows[idx];
+                var chatPane = $(win.document).contents().find("#chat-messages");
+                chatPane.append (chatEl.clone());
+            }
+        }          
         $("#chat-messages").append(chatEl);  
 
     };
@@ -105,6 +113,13 @@ THE SOFTWARE.
           .append(
             jQuery("<span>", {class:"text", text: chat.message})
           );
+        if (all_windows) {
+            for (var idx in all_windows) {
+                var win = all_windows[idx];
+                var chatPane = $(win.document).contents().find("#chat-messages");
+                chatPane.append (chatEl.clone());
+            }
+        }          
         $("#chat-messages").append(chatEl);  
     };
 
@@ -130,7 +145,7 @@ THE SOFTWARE.
     };
 
     function onChatCommand(command) {
-        var idx = command.search("/pm");
+        var idx = command.indexOf("/pm");
         if (idx == 0) {
             var nameAndMessage = command.slice(4);
             if (nameAndMessage[0] == "@") {
@@ -175,7 +190,7 @@ THE SOFTWARE.
         var message = "";
         for (var idx in usersInRoom) {
             username = usersInRoom[idx].username;
-            if (input.search(username) == 0) {
+            if (input.indexOf(username) == 0) {
                 message = input.slice(username.length + 1);
                 return [username, message];
             }
@@ -200,6 +215,24 @@ THE SOFTWARE.
         if (info.whatsNew.length > 0) {
             displayStatusChat(info.whatsNew);
         }
+
+        //HACK HACK HACK
+        //Maintain a reference towin new open windows (pop-up chat)
+        window._open = window.open;
+        window.open = function(url, name, params)
+        {
+            var old_all_windows = all_windows;
+            all_windows = [];
+            for (var idx in all_windows) {
+                var win = all_windows.pop();
+                if (!win.closed) {
+                    all_windows.push(win);
+                }
+            }
+            var newWindow = window._open(url, name, params);
+            all_windows.push(newWindow);
+            return newWindow;
+        };
 
         //Register with plug's API object
         API.sendPMToUserInRoom = sendPMToUserInRoom;
