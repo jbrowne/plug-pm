@@ -21,6 +21,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
+var badoopScript = document.createElement('script');
+badoopScript.text = 'function badoop() { new Audio("' + chrome.extension.getURL('sounds/badoop.mp3') + '").play(); }';
+(document.head||document.documentElement).appendChild(badoopScript);
+
 var s = document.createElement('script');
 s.src = chrome.extension.getURL('scripts/plug-pm.js');
 s.onload = function() {
