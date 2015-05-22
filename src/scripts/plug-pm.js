@@ -25,9 +25,9 @@ THE SOFTWARE.
     var _all_windows = [];
 
     var info = {
-        version: 0.7,
+        version: 0.8,
         author: "citizenSnips",
-        whatsNew: "Pop-out chat support and delivery confirmation."
+        whatsNew: "Badoop!"
     };
 
     var messagesInTransit = {};
@@ -68,6 +68,10 @@ THE SOFTWARE.
             return; // Don't display if we don't know who it's from.
         }
 
+        if (badoop) {
+            badoop(); 
+        }
+
         var chatEl = 
           jQuery("<div>", {class: "message user-action"})
           .append(
@@ -92,10 +96,13 @@ THE SOFTWARE.
             for (var idx in _all_windows) {
                 var win = _all_windows[idx];
                 var chatPane = $(win.document).contents().find("#chat-messages");
+                window.chatPane = chatPane;
                 chatPane.append (chatEl.clone());
+                if (chatPane.length > 0 && chatPane[0].scrollHeight) {
+                    chatPane.scrollTop(chatPane[0].scrollHeight);
+                }
             }
         }          
-        $("#chat-messages").append(chatEl);  
 
     }
 
@@ -136,9 +143,11 @@ THE SOFTWARE.
                 var win = _all_windows[idx];
                 var chatPane = $(win.document).contents().find("#chat-messages");
                 chatPane.append (chatEl.clone());
+                if (chatPane.length > 0 && chatPane[0].scrollHeight) {
+                    chatPane.scrollTop(chatPane[0].scrollHeight);
+                }
             }
         }          
-        $("#chat-messages").append(chatEl);  
     }
 
     function onChatRecieved(chat) 
@@ -274,12 +283,13 @@ THE SOFTWARE.
         //HACK HACK HACK
         //Maintain a reference towin new open windows (pop-up chat)
         window._open = window.open;
+        _all_windows = [window];
         window.open = function(url, name, params)
         {
             var old__all_windows = _all_windows;
             _all_windows = [];
-            for (var idx in _all_windows) {
-                var win = _all_windows.pop();
+            for (var idx in old__all_windows) {
+                var win = old__all_windows[idx];
                 if (!win.closed) {
                     _all_windows.push(win);
                 }
